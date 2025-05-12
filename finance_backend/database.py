@@ -3,6 +3,13 @@ import pymysql
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from urllib.parse import urlparse
+
+# Retrieve the DATABASE_URL from environment variables
+db_url = os.environ.get('DATABASE_URL')
+
+# Parse the DATABASE_URL to extract components (host, port, user, password, database)
+parsed_url = urlparse(db_url)
 
 app = Flask(__name__)
 CORS(app, origins=["http://localhost:5173", "https://finance-manager-snowy.vercel.app/login"], supports_credentials=True)
@@ -46,11 +53,12 @@ def index():
 
                 print("🔌 Attempting to connect to MySQL...")
                 connection = pymysql.connect(
-                    host=os.environ.get('DB_HOST'),
-                    port=int(os.environ.get('DB_PORT', 3306)),
-                    user=os.environ.get('DB_USER'),
-                    password=os.environ.get('DB_PASSWORD'),
-                    database=os.environ.get('DB_NAME')
+                    host=parsed_url.hostname,        # Database host (from the URL)
+                    port=parsed_url.port,            # Database port (from the URL)
+                    user=parsed_url.username,        # Database user (from the URL)
+                    password=parsed_url.password,    # Database password (from the URL)
+                    database=parsed_url.path.lstrip('/'),  # Database name (from the URL, stripped of the leading '/')
+                    
                 )
 
                 with connection:
@@ -76,12 +84,12 @@ def index():
 
                 print("🔌 Attempting to connect to MySQL...")
                 connection = pymysql.connect(
-                    host=os.environ.get('DB_HOST'),
-                    port=int(os.environ.get('DB_PORT', 3306)),
-                    user=os.environ.get('DB_USER'),
-                    password=os.environ.get('DB_PASSWORD'),
-                    database=os.environ.get('DB_NAME'),
-                    cursorclass=pymysql.cursors.DictCursor  # <== This is GOOD and works!
+                    host=parsed_url.hostname,        # Database host (from the URL)
+                    port=parsed_url.port,            # Database port (from the URL)
+                    user=parsed_url.username,        # Database user (from the URL)
+                    password=parsed_url.password,    # Database password (from the URL)
+                    database=parsed_url.path.lstrip('/'),  # Database name (from the URL, stripped of the leading '/')
+                    cursorclass=pymysql.cursors.DictCursor  # Ensures results are returned as dictionaries
                 )
 
 
@@ -110,11 +118,12 @@ def index():
             try:
                 print("🔌 Attempting to connect to MySQL...")
                 connection = pymysql.connect(
-                    host=os.environ.get('DB_HOST'),
-                    port=int(os.environ.get('DB_PORT', 3306)),
-                    user=os.environ.get('DB_USER'),
-                    password=os.environ.get('DB_PASSWORD'),
-                    database=os.environ.get('DB_NAME')
+                    host=parsed_url.hostname,        # Database host (from the URL)
+                    port=parsed_url.port,            # Database port (from the URL)
+                    user=parsed_url.username,        # Database user (from the URL)
+                    password=parsed_url.password,    # Database password (from the URL)
+                    database=parsed_url.path.lstrip('/'),  # Database name (from the URL, stripped of the leading '/')
+                    
                 )
 
                 sql = "DELETE FROM businessdata WHERE id = %s"
@@ -146,12 +155,12 @@ def get_data():
         try:
             print("🔌 Attempting to connect to MySQL...")
             connection = pymysql.connect(
-                host=os.environ.get('DB_HOST'),
-                port=int(os.environ.get('DB_PORT', 3306)),
-                user=os.environ.get('DB_USER'),
-                password=os.environ.get('DB_PASSWORD'),
-                database=os.environ.get('DB_NAME'),
-                cursorclass=pymysql.cursors.DictCursor  # <== This is GOOD and works!
+                host=parsed_url.hostname,        # Database host (from the URL)
+                port=parsed_url.port,            # Database port (from the URL)
+                user=parsed_url.username,        # Database user (from the URL)
+                password=parsed_url.password,    # Database password (from the URL)
+                database=parsed_url.path.lstrip('/'),  # Database name (from the URL, stripped of the leading '/')
+                cursorclass=pymysql.cursors.DictCursor  # Ensures results are returned as dictionaries
             )
 
 
