@@ -97,20 +97,18 @@ def index():
                         result = cursor.fetchone()
 
                         if result:
+                            # Fetch the hashed password from the DB
                             db_password = result['password']
+                            input_password = backlist.get('password')
 
-                            # Debug print
-                            print(f"📦 From DB (type: {type(db_password)}): {db_password}")
-                            print(f"🔑 Input password (type: {type(password)}): {password}")
-
-                            # Ensure both are str
+                            # Ensure both are strings (decode if needed)
                             if isinstance(db_password, bytes):
-                                db_password = db_password.decode('utf-8')
-                            if isinstance(password, bytes):
-                                password = password.decode('utf-8')
+                                db_password = db_password.decode("utf-8")
+                            if isinstance(input_password, bytes):
+                                input_password = input_password.decode("utf-8")
 
-                            # Now check
-                            if check_password_hash(db_password, password):
+                            # Do the check
+                            if check_password_hash(db_password, input_password):
                                 return jsonify({"success": True, "message": "Login successful"})
                             else:
                                 return jsonify({"success": False, "message": "Invalid password"})
