@@ -18,7 +18,7 @@ print("DB:", parsed_url.path)
 
 
 app = Flask(__name__)
-CORS(app, origins=["http://localhost:5173", "https://finance-manager-snowy.vercel.app/login"], supports_credentials=True)
+CORS(app, origins=["http://localhost:5173", "https://finance-manager-snowy.vercel.app"], supports_credentials=True)
 
 @app.route('/', methods=["GET", "POST"])
 def index():
