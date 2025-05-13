@@ -75,48 +75,45 @@ def index():
 
 
         elif add == "Check":
-
             backlist = data.get('backlist', {})
             username = backlist.get('username')
             password = backlist.get('password')
 
             try:
-
                 print("🔌 Attempting to connect to MySQL...")
                 connection = pymysql.connect(
-                    host=parsed_url.hostname,        # Database host (from the URL)
-                    port=parsed_url.port,            # Database port (from the URL)
-                    user=parsed_url.username,        # Database user (from the URL)
-                    password=parsed_url.password,    # Database password (from the URL)
-                    database=parsed_url.path.lstrip('/'),  # Database name (from the URL, stripped of the leading '/')
-                    cursorclass=pymysql.cursors.DictCursor  # Ensures results are returned as dictionaries
+                    host=parsed_url.hostname,
+                    port=parsed_url.port,
+                    user=parsed_url.username,
+                    password=parsed_url.password,
+                    database=parsed_url.path.lstrip('/'),
+                    cursorclass=pymysql.cursors.DictCursor
                 )
-
 
                 sql = "SELECT * FROM datalogin WHERE username = %s"
                 with connection:
                     with connection.cursor() as cursor:
-                        cursor.execute(sql, (username,))  # Use parameterized queries to avoid SQL injection
-                        result = cursor.fetchone()  # Get the first row (if any)
-                        
+                        cursor.execute(sql, (username,))
+                        result = cursor.fetchone()
+
                         if result:
                             db_password = result['password']
 
-                            # Ensure password is a string (decode if it's bytes)
+                            # ✅ Force db_password to string
                             if isinstance(db_password, bytes):
                                 db_password = db_password.decode('utf-8')
 
+                            # ✅ Do not encode input password — just use it as-is
                             if check_password_hash(db_password, password):
                                 return jsonify({"success": True, "message": "Login successful"})
                             else:
                                 return jsonify({"success": False, "message": "Invalid password"})
                         else:
                             return jsonify({"success": False, "message": "User not found"})
-
             except Exception as e:
-                print("❌ Error inserting data:", str(e))
+                print("❌ Error during login check:", str(e))
                 return jsonify({"success": False, "message": "Database error", "error": str(e)}), 500
-        
+
 
         
         elif add == "Delete":
