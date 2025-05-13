@@ -6,10 +6,16 @@ from flask_cors import CORS
 from urllib.parse import urlparse
 
 # Retrieve the DATABASE_URL from environment variables
-db_url = os.environ.get('DATABASE_URL')
+db_url = os.environ.get("DATABASE_URL")
 
 # Parse the DATABASE_URL to extract components (host, port, user, password, database)
 parsed_url = urlparse(db_url)
+print("Parsed URL parts:")
+print("Host:", parsed_url.hostname)
+print("User:", parsed_url.username)
+print("Password:", type(parsed_url.password), parsed_url.password)
+print("DB:", parsed_url.path)
+
 
 app = Flask(__name__)
 CORS(app, origins=["http://localhost:5173", "https://finance-manager-snowy.vercel.app/login"], supports_credentials=True)
@@ -75,45 +81,41 @@ def index():
 
 
         elif add == "Check":
+
             backlist = data.get('backlist', {})
             username = backlist.get('username')
             password = backlist.get('password')
 
             try:
+
                 print("🔌 Attempting to connect to MySQL...")
                 connection = pymysql.connect(
-                    host=parsed_url.hostname,
-                    port=parsed_url.port,
-                    user=parsed_url.username,
-                    password=parsed_url.password,
-                    database=parsed_url.path.lstrip('/'),
-                    cursorclass=pymysql.cursors.DictCursor
+                    host=parsed_url.hostname,        # Database host (from the URL)
+                    port=parsed_url.port,            # Database port (from the URL)
+                    user=parsed_url.username,        # Database user (from the URL)
+                    password=parsed_url.password,    # Database password (from the URL)
+                    database=parsed_url.path.lstrip('/'),  # Database name (from the URL, stripped of the leading '/')
+                    cursorclass=pymysql.cursors.DictCursor  # Ensures results are returned as dictionaries
                 )
+
 
                 sql = "SELECT * FROM datalogin WHERE username = %s"
                 with connection:
                     with connection.cursor() as cursor:
-                        cursor.execute(sql, (username,))
-                        result = cursor.fetchone()
-
-                        if result is not None:
-                            hashed_password = result['password']
-                            
-                            # Remove this block! Not needed:
-                            # if isinstance(hashed_password, bytes):
-                            #     hashed_password = hashed_password.decode('utf-8')
-
-                            if check_password_hash(hashed_password, password):
+                        cursor.execute(sql, (username,))  # Use parameterized queries to avoid SQL injection
+                        result = cursor.fetchone()  # Get the first row (if any)
+                        
+                        if result:
+                            if check_password_hash(result['password'], password):
                                 return jsonify({"success": True, "message": "Login successful"})
                             else:
                                 return jsonify({"success": False, "message": "Invalid password"})
                         else:
                             return jsonify({"success": False, "message": "User not found"})
-
             except Exception as e:
-                print("❌ Error during login check:", str(e))
+                print("❌ Error inserting data:", str(e))
                 return jsonify({"success": False, "message": "Database error", "error": str(e)}), 500
-
+        
 
         
         elif add == "Delete":
@@ -153,7 +155,7 @@ def index():
 @app.route('/get_data', methods=["GET", "POST"])
 def get_data():
     if request.method == "GET":
-        sql = "SELECT * FROM Businessdata ORDER BY Year DESC, Month DESC LIMIT 12"
+        sql = "SELECT * FROM businessdata ORDER BY Year DESC, Month DESC LIMIT 12"
 
 
         try:
