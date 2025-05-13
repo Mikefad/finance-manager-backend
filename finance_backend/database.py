@@ -96,25 +96,18 @@ def index():
                         cursor.execute(sql, (username,))
                         result = cursor.fetchone()
 
-                        if result:
-                            # Fetch the hashed password from the DB
-                            db_password = result['password']
-                            input_password = backlist.get('password')
-
-                            # Ensure both are strings (decode if needed)
-                            if isinstance(db_password, bytes):
-                                db_password = db_password.decode("utf-8")
-                            if isinstance(input_password, bytes):
-                                input_password = input_password.decode("utf-8")
-
-                            # Do the check
-                            if check_password_hash(db_password, input_password):
+                        if result is not None:
+                            hashed_password = result['password']
+                            if isinstance(hashed_password, bytes):
+                                hashed_password = hashed_password.decode('utf-8')
+                            
+                            if check_password_hash(hashed_password, password):
                                 return jsonify({"success": True, "message": "Login successful"})
                             else:
                                 return jsonify({"success": False, "message": "Invalid password"})
-
                         else:
                             return jsonify({"success": False, "message": "User not found"})
+
             except Exception as e:
                 print("❌ Error during login check:", str(e))
                 return jsonify({"success": False, "message": "Database error", "error": str(e)}), 500
