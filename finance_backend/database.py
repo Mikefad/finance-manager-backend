@@ -100,8 +100,16 @@ def index():
                         result = cursor.fetchone()  # Get the first row (if any)
                         
                         if result:
-                            if check_password_hash(result['password'], password):
-                                return jsonify({"success": True, "message": "Login successful"})
+                            db_password = result['password']
+
+                            # If password is bytes, decode it
+                            if isinstance(db_password, bytes):
+                                db_password = db_password.decode('utf-8')
+
+                                if check_password_hash(db_password, password):
+                                    return jsonify({"success": True, "message": "Login successful"})
+                                else:
+                                    return jsonify({"success": False, "message": "Invalid password"})
                             else:
                                 return jsonify({"success": False, "message": "Invalid password"})
                         else:
