@@ -102,18 +102,17 @@ def index():
                         if result:
                             db_password = result['password']
 
-                            # If password is bytes, decode it
+                            # Ensure password is a string (decode if it's bytes)
                             if isinstance(db_password, bytes):
                                 db_password = db_password.decode('utf-8')
 
-                                if check_password_hash(db_password, password):
-                                    return jsonify({"success": True, "message": "Login successful"})
-                                else:
-                                    return jsonify({"success": False, "message": "Invalid password"})
+                            if check_password_hash(db_password, password):
+                                return jsonify({"success": True, "message": "Login successful"})
                             else:
                                 return jsonify({"success": False, "message": "Invalid password"})
                         else:
                             return jsonify({"success": False, "message": "User not found"})
+
             except Exception as e:
                 print("❌ Error inserting data:", str(e))
                 return jsonify({"success": False, "message": "Database error", "error": str(e)}), 500
