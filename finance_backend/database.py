@@ -98,9 +98,11 @@ def index():
 
                         if result is not None:
                             hashed_password = result['password']
-                            if isinstance(hashed_password, bytes):
-                                hashed_password = hashed_password.decode('utf-8')
                             
+                            # Remove this block! Not needed:
+                            # if isinstance(hashed_password, bytes):
+                            #     hashed_password = hashed_password.decode('utf-8')
+
                             if check_password_hash(hashed_password, password):
                                 return jsonify({"success": True, "message": "Login successful"})
                             else:
